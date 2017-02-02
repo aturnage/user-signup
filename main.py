@@ -49,7 +49,6 @@ username_form = """
         Username: 
         <input type="text" name="username"/>
     </label>
-    <br>
 """
 #Form asking for password
 password_form = """
@@ -58,7 +57,6 @@ password_form = """
         Password: 
         <input type="text" name="password"/>
     </label>
-    <br>
 """
 #Form verifying password
 verify_form = """
@@ -67,7 +65,6 @@ verify_form = """
         Verify: 
         <input type="text" name="verify"/>
     </label>
-    <br>
 """
 #Form asking for email
 email_form = """
@@ -76,7 +73,6 @@ email_form = """
         Email (Optional): 
         <input type="text" name="email"/>
     </label>
-    <br>
 """
 #submit button for all forms
 submit = """
@@ -98,7 +94,8 @@ def valid_email(email):
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = page_header + username_form + err_username + password_form + verify_form + email_form + submit + page_footer
+        content = (page_header + username_form + "<br>" + password_form + "<br>" + verify_form +
+        "<br>" + email_form + "<br>" + submit + page_footer)
 
         self.response.write(content)
 
@@ -109,14 +106,36 @@ class MainHandler(webapp2.RequestHandler):
         verify = self.request.get('verify')
         email = self.request.get('email')
 
-        params = dict(username = username,
-                      email = email)
-
         if not valid_username(username):
-          err_username = "That's not a valid username."
+            err_username = "That's not a valid username."
             have_error = True
+    
+        if not valid_password(password):
+            err_password = "That wasn't a valid password."
+            have_error = True
+
+        elif password != verify:
+            err_verify = "Your passwords didn't match."
+            have_error = True
+
+        if not valid_email(email):
+            err_email = "That's not a valid email."
+            have_error = True
+
+        if have_error:
+            err_content = (page_header + username_form + err_username + "<br>" + password_form + err_password + "<br>" +
+            verify_form + err_verify + "<br>" + email_form + err_email + "<br>" + submit + page_footer)
+
+            self.response.write(err_content)
+        else:
+            self.redirect('/welcome?username=' + username)
+
+class WelcomeHandler(webapp2.RequestHandler):
+    def post(self):
+       self.response.write("<h1>Welcome</h1>" + username)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/)
+    ('/welcome', WelcomeHandler)
 ], debug=True)
