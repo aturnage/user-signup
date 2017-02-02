@@ -16,6 +16,7 @@
 #
 import webapp2
 import cgi
+import re
 
 # html boilerplate for the top of every page
 page_header = """
@@ -83,18 +84,39 @@ submit = """
     <input type="submit" value="submit">
 </form>
 """
+user_check = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+def valid_username(username):
+    return username and user_check.match(username)
+
+pass_check = re.compile(r"^.{3,20}$")
+def valid_password(password):
+    return password and pass_check.match(password)
+
+email_check = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+def valid_email(email):
+    return not email or email_check.match(email)
+
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = page_header + username_form + password_form + verify_form + email_form + submit + page_footer
+        content = page_header + username_form + err_username + password_form + verify_form + email_form + submit + page_footer
 
         self.response.write(content)
 
     def post(self):
+        have_error = False
         username = self.request.get('username')
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
-        
+
+        params = dict(username = username,
+                      email = email)
+
+        if not valid_username(username):
+          err_username = "That's not a valid username."
+            have_error = True
+
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/)
 ], debug=True)
