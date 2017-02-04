@@ -32,20 +32,20 @@ page = """
     <h1>Signup</h1>
     <form method="post">
         <label>Username:</label>
-        <input type="text" name="username" value={0} required/>
-        <!--<span class="error">"%(err_username)s"</span>-->
+        <input type="text" name="username" value="%(username)s"/>
+        <span class="error">%(err_username)s</span>
         <br>
         <label>Password:</label>
-        <input type="text" name="password" value="password" required/>
-        <!--<span class="error">err_password</span>-->
+        <input type="text" name="password" value="%(password)s"/>
+        <span class="error">%(err_password)s</span>
         <br>
         <label>Verify Password:</label>
-        <input type="text" name="verify" value="verify" required/>
-        <!--<span>err_verify</span>-->
+        <input type="text" name="verify" value="%(verify)s"/>
+        <span class="error">%(err_verify)s</span>
         <br>
         <label>Email (Optional):</label>
-        <input type="text" name="email" value="email" required/>
-        <!--<span>err_email</span>-->
+        <input type="text" name="email" value="%(email)s"/>
+        <span class="error">%(err_email)s</span>
         <br>
         <input type="submit" value="submit">
 </body>
@@ -65,18 +65,19 @@ def valid_email(email):
     return not email or email_check.match(email)
 
 class MainHandler(webapp2.RequestHandler):
-    def build_page(self, username=""):
-        self.response.write(page.format(username))
+    def write_page(self, username="", password="", verify="", email="", err_username="", err_password="", err_verify="",err_email=""):
+        self.response.write(page % {"username":username,"password":password, "verify":verify,"email":email,
+                                    "err_username":err_username, "err_password":err_password, "err_verify": err_verify,
+                                    "err_email":err_email})
 
     def get(self):
+        self.write_page()
+
+    def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
-
-        
-
-    def post(self):
         have_error = False
 
         if not valid_username(username):
@@ -96,10 +97,7 @@ class MainHandler(webapp2.RequestHandler):
             have_error = True
 
         if have_error:
-            err_content = (page_header + username_form + err_username + "<br>" + password_form + err_password + "<br>" +
-            verify_form + err_verify + "<br>" + email_form + err_email + "<br>" + submit + page_footer)
-
-            self.response.write(err_content)
+            self.write_page()
         else:
             self.redirect('/welcome?username=' + username)
 
