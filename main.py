@@ -19,67 +19,39 @@ import cgi
 import re
 
 # html boilerplate for the top of every page
-page_header = """
+page = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>Signup</title>
     <style type="text/css">
-        .error {
-            color: red;
-        }
+        .error {color: red;}
     </style>
 </head>
 <body>
-    <h1>
-        Signup
-    </h1>
-"""
-
-# html boilerplate for the bottom of every page
-page_footer = """
+    <h1>Signup</h1>
+    <form method="post">
+        <label>Username:</label>
+        <input type="text" name="username" value={0} required/>
+        <!--<span class="error">"%(err_username)s"</span>-->
+        <br>
+        <label>Password:</label>
+        <input type="text" name="password" value="password" required/>
+        <!--<span class="error">err_password</span>-->
+        <br>
+        <label>Verify Password:</label>
+        <input type="text" name="verify" value="verify" required/>
+        <!--<span>err_verify</span>-->
+        <br>
+        <label>Email (Optional):</label>
+        <input type="text" name="email" value="email" required/>
+        <!--<span>err_email</span>-->
+        <br>
+        <input type="submit" value="submit">
 </body>
 </html>
 """
 
-# a form for asking for username
-username_form = """
-<form name="username" method="post">
-    <label>
-        Username: 
-        <input type="text" name="username"/>
-    </label>
-"""
-#Form asking for password
-password_form = """
-<form name="password" method="post">
-    <label>
-        Password: 
-        <input type="text" name="password"/>
-    </label>
-"""
-#Form verifying password
-verify_form = """
-<form name="verify" method="post">
-    <label>
-        Verify: 
-        <input type="text" name="verify"/>
-    </label>
-"""
-#Form asking for email
-email_form = """
-<form name="email" method="post">
-    <label>
-        Email (Optional): 
-        <input type="text" name="email"/>
-    </label>
-"""
-#submit button for all forms
-submit = """
-<form>
-    <input type="submit" value="submit">
-</form>
-"""
 user_check = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return username and user_check.match(username)
@@ -93,18 +65,19 @@ def valid_email(email):
     return not email or email_check.match(email)
 
 class MainHandler(webapp2.RequestHandler):
+    def build_page(self, username=""):
+        self.response.write(page.format(username))
+
     def get(self):
-        content = (page_header + username_form + "<br>" + password_form + "<br>" + verify_form +
-        "<br>" + email_form + "<br>" + submit + page_footer)
-
-        self.response.write(content)
-
-    def post(self):
-        have_error = False
         username = self.request.get('username')
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
+
+        
+
+    def post(self):
+        have_error = False
 
         if not valid_username(username):
             err_username = "That's not a valid username."
