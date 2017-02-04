@@ -18,39 +18,6 @@ import webapp2
 import cgi
 import re
 
-# html boilerplate for the top of every page
-# page = """
-# <!DOCTYPE html>
-# <html>
-# <head>
-#     <title>Signup</title>
-#     <style type="text/css">
-#         .error {color: red;}
-#     </style>
-# </head>
-# <body>
-#     <h1>Signup</h1>
-#     <form method="post">
-#         <label>Username:</label>
-#         <input type="text" name="username" value="%(username)s"/>
-#         <span class="error">%(err_username)s</span>
-#         <br>
-#         <label>Password:</label>
-#         <input type="text" name="password" value="%(password)s"/>
-#         <span class="error">%(err_password)s</span>
-#         <br>
-#         <label>Verify Password:</label>
-#         <input type="text" name="verify" value="%(verify)s"/>
-#         <span class="error">%(err_verify)s</span>
-#         <br>
-#         <label>Email (Optional):</label>
-#         <input type="text" name="email" value="%(email)s"/>
-#         <span class="error">%(err_email)s</span>
-#         <br>
-#         <input type="submit" value="submit">
-# </body>
-# </html>
-# """
 page = """
 <!DOCTYPE html>
 <html>
