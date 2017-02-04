@@ -144,7 +144,7 @@ class MainHandler(webapp2.RequestHandler):
 class WelcomeHandler(webapp2.RequestHandler):
     def get(self):
        username = self.request.get('username')
-       self.response.write("<h1>Welcome, " + username + "</h1>")
+       self.response.write("<h1>Welcome, " + username + "!" + "</h1>")
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
