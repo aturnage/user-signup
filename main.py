@@ -19,54 +19,111 @@ import cgi
 import re
 
 # html boilerplate for the top of every page
+# page = """
+# <!DOCTYPE html>
+# <html>
+# <head>
+#     <title>Signup</title>
+#     <style type="text/css">
+#         .error {color: red;}
+#     </style>
+# </head>
+# <body>
+#     <h1>Signup</h1>
+#     <form method="post">
+#         <label>Username:</label>
+#         <input type="text" name="username" value="%(username)s"/>
+#         <span class="error">%(err_username)s</span>
+#         <br>
+#         <label>Password:</label>
+#         <input type="text" name="password" value="%(password)s"/>
+#         <span class="error">%(err_password)s</span>
+#         <br>
+#         <label>Verify Password:</label>
+#         <input type="text" name="verify" value="%(verify)s"/>
+#         <span class="error">%(err_verify)s</span>
+#         <br>
+#         <label>Email (Optional):</label>
+#         <input type="text" name="email" value="%(email)s"/>
+#         <span class="error">%(err_email)s</span>
+#         <br>
+#         <input type="submit" value="submit">
+# </body>
+# </html>
+# """
 page = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>Signup</title>
     <style type="text/css">
+        .label {text-align: right;}
         .error {color: red;}
     </style>
 </head>
 <body>
     <h1>Signup</h1>
     <form method="post">
-        <label>Username:</label>
-        <input type="text" name="username" value="%(username)s"/>
-        <span class="error">%(err_username)s</span>
-        <br>
-        <label>Password:</label>
-        <input type="text" name="password" value="%(password)s"/>
-        <span class="error">%(err_password)s</span>
-        <br>
-        <label>Verify Password:</label>
-        <input type="text" name="verify" value="%(verify)s"/>
-        <span class="error">%(err_verify)s</span>
-        <br>
-        <label>Email (Optional):</label>
-        <input type="text" name="email" value="%(email)s"/>
-        <span class="error">%(err_email)s</span>
-        <br>
-        <input type="submit" value="submit">
+        <table>
+            <tr>
+                <td class="label">
+                    Username:
+                </td>
+                <td>
+                    <input type="text" name="username" value="%(username)s"/>
+                </td>
+                <td>
+                    <span class="error">%(err_username)s</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Password:
+                </td>
+                <td>
+                    <input type="password" name="password" value="%(password)s"/>
+                </td>
+                <td>
+                    <span class="error">%(err_password)s</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Verify Password:
+                </td>
+                <td>
+                    <input type="password" name="verify" value="%(verify)s"/>
+                </td>
+                <td>
+                    <span class="error">%(err_verify)s</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Email (Optional):
+                </td>
+                <td>
+                     <input type="text" name="email" value="%(email)s"/>
+                </td>
+                <td>
+                    <span class="error">%(err_email)s</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <input type="submit" value="submit">
+                </td>
+            </tr>
+        </table>
 </body>
 </html>
 """
 
-user_check = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-def valid_username(username):
-    return username and user_check.match(username)
-
-pass_check = re.compile(r"^.{3,20}$")
-def valid_password(password):
-    return password and pass_check.match(password)
-
-email_check = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-def valid_email(email):
-    return not email or email_check.match(email)
-
 class MainHandler(webapp2.RequestHandler):
     def write_page(self, username="", password="", verify="", email="", err_username="", err_password="", err_verify="",err_email=""):
-        self.response.write(page % {"username":username,"password":password, "verify":verify,"email":email,
+        self.response.write(page % {"username":username,"password":"", "verify":"","email":email,
                                     "err_username":err_username, "err_password":err_password, "err_verify": err_verify,
                                     "err_email":err_email})
 
@@ -74,11 +131,27 @@ class MainHandler(webapp2.RequestHandler):
         self.write_page()
 
     def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-        verify = self.request.get('verify')
-        email = self.request.get('email')
+        username = cgi.escape(self.request.get('username'))
+        password = cgi.escape(self.request.get('password'))
+        verify = cgi.escape(self.request.get('verify'))
+        email = cgi.escape(self.request.get('email'))
         have_error = False
+        err_username=""
+        err_password=""
+        err_verify=""
+        err_email=""
+
+        user_check = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+        def valid_username(username):
+            return username and user_check.match(username)
+
+        pass_check = re.compile(r"^.{3,20}$")
+        def valid_password(password):
+            return password and pass_check.match(password)
+
+        email_check = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+        def valid_email(email):
+            return not email or email_check.match(email)
 
         if not valid_username(username):
             err_username = "That's not a valid username."
@@ -97,14 +170,14 @@ class MainHandler(webapp2.RequestHandler):
             have_error = True
 
         if have_error:
-            self.write_page()
+            self.write_page(username, password, verify, email, err_username, err_password, err_verify,err_email)
         else:
             self.redirect('/welcome?username=' + username)
 
 class WelcomeHandler(webapp2.RequestHandler):
-    def post(self):
-       self.response.write("<h1>Welcome</h1>" + username)
-
+    def get(self):
+       username = self.request.get('username')
+       self.response.write("<h1>Welcome, " + username + "</h1>")
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
